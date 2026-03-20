@@ -6,11 +6,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export const summarizeText = async (text) => {
   if (!process.env.GEMINI_API_KEY) {
+    console.error('SERVER ERROR: GEMINI_API_KEY is missing from environment.');
     throw new Error('No API Key found in .env');
   }
+  
+  console.log('Using API key (prefix):', process.env.GEMINI_API_KEY.substring(0, 10) + '...');
 
   const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
     generationConfig: { responseMimeType: "application/json" }
   });
 
@@ -36,11 +39,12 @@ export const summarizeText = async (text) => {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const jsonStr = response.text();
+    console.log('AI response received successfully.');
     
     return JSON.parse(jsonStr);
   } catch (err) {
-    console.error('Error with Gemini API:', err);
-    throw new Error('Could not get summary from AI');
+    console.error('FULL ERROR with Gemini API:', err);
+    throw new Error('Could not get summary from AI: ' + err.message);
   }
 };
 
